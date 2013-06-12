@@ -13,7 +13,6 @@ namespace Sharpness
 {
     // TODO
     //    [[UIImageView alloc] initWithFrame:
-//[[UILabel alloc] initWithFrame:
 //imageView.image
 //UIViewContentModeCenter
 //NSTextAlignmentCenter
@@ -24,6 +23,8 @@ namespace Sharpness
 //UIImageOrientationUp
 //CGImageRelease(imageRef);
 //font pointSize
+    // [aView isKindOfClass:self] -> aView is this.GetType()
+
 
     public class Enumeration
     {
@@ -55,9 +56,7 @@ namespace Sharpness
     {
         static void Main(string[] args)
         {
-            TransformFile(@"..\..\QBPopupMenu.m", @"C:\Users\jivko\Downloads", null);
-            TransformFile(@"..\..\QBPopupMenuItem.m", @"C:\Users\jivko\Downloads", null);
-            TransformFile(@"..\..\QBPopupMenuOverlayView.m", @"C:\Users\jivko\Downloads", null);
+            TransformFile(@"..\..\MBProgressHUD.m", @"C:\Users\jivko\Downloads", null);
         }
 
         private static Metadata TransformFile(string filePath, string outputDir, Metadata metadata)
@@ -168,17 +167,78 @@ namespace Sharpness
 
             text = ReplaceDefineStatements(text);
 
-            text = Regex.Replace(text, @"^@property (\(nonatomic, strong\)|\(nonatomic, assign\))?(.*?) \*?([^\*]*?);$", "public $2 $3;", RegexOptions.Multiline);
+            text = text.Replace("NSString", "string");
+
+            // UILabel *label; -- remove star
+            text = Regex.Replace(text, @"^(\s*[_a-zA-Z]*?\s*?)\*([_a-zA-Z]*?;\s*)$", "$1$2", RegexOptions.Multiline);
+
+            // [view addSubview:hud]; -> view.AddSubview(hud);
+            text = Regex.Replace(text, @"\[([_a-zA-Z]*?)\s*addSubview:([_a-zA-Z]*?)\];", "$1.Add($2);");
+
+            // [hud show:animated]; -> hud.show(animated);
+            text = Regex.Replace(text, @"\[([_a-zA-Z]*?)\s*([_a-zA-Z]*?):([_a-zA-Z\.]*?)\];", "$1.$2($3);");
+
+            // [this setupLabels]; -> this.setupLabels();
+            text = Regex.Replace(text, @"\[([_a-zA-Z]*?)\s*([_a-zA-Z]*?)\];", "$1.$2();");
+
+            // RectangleFInset(allRect, 2.0f, 2.0f); -> allRect.Inset(2.0f, 2.0f);
+            text = Regex.Replace(text, @"CGRectInset\(([_a-zA-Z]*?),", "$1.Inset(");
+
+            // [[UIColor alloc] initWithWhite:1.f alpha:1.f] -> UIColor.FromWhiteAlpha(1.f, 1.f)
+            text = Regex.Replace(text, @"\[\[UIColor alloc\] initWithWhite:([\d\.f]*?) alpha:([\d\.f]*?)\]", "UIColor.FromWhiteAlpha($1, $2)");
+
+            // [keyPath isEqualToString:@"labelText"] -> keyPath == "labelText"
+            text = Regex.Replace(text, @"\[([_a-zA-Z]*?)\s*isEqualToString:@\""([_a-zA-Z]*?)\""\]", @"$1 == ""$2""");
+
+            // [label.Text sizeWithFont:label.Font] -> new NSString(label.Text).StringSize(label.Font)
+            text = Regex.Replace(text, @"\[([_a-zA-Z\.]*?)\s*sizeWithFont:([_a-zA-Z\.]*?)\]", "new NSString($1).StringSize($2)");
+
+            text = text.Replace("[[UILabel alloc] init]", "new UILabel()");
+            text = Regex.Replace(text, @"\[\[UILabel alloc\] initWithFrame:([\._a-zA-Z]*?)\]", "new UILabel($1)");
+
+            // word replacements, nill, self, YES, NO
+            text = Regex.Replace(text, @"\bnil\b", "null");
+            text = Regex.Replace(text, @"\bself\b", "this");
+            text = Regex.Replace(text, @"\bYES\b", "true");
+            text = Regex.Replace(text, @"\bNO\b", "false");
+            text = Regex.Replace(text, @"\bUIInterfaceOrientationPortraitUpsideDown\b", "UIInterfaceOrientation.PortraitUpsideDown");
+            text = Regex.Replace(text, @"\bUIInterfaceOrientationPortrait\b", "UIInterfaceOrientation.Portrait");
+            text = Regex.Replace(text, @"\bUIInterfaceOrientationLandscapeLeft\b", "UIInterfaceOrientation.LandscapeLeft");
+            text = Regex.Replace(text, @"\bUIInterfaceOrientationLandscapeRight\b", "UIInterfaceOrientation.LandscapeRight");
+            text = Regex.Replace(text, @"\bUIInterfaceOrientationIsLandscape\b", "UIInterfaceOrientation.IsLandscape");
+            text = Regex.Replace(text, @"\bUIInterfaceOrientationIsPortrait\b", "UIInterfaceOrientation.IsPortrait");
+
+            var capitalizeProperties = new[] { 
+                "setNeedsDisplay",
+                "setStroke",
+                "setFill",
+                "set",
+                "stroke",
+                "sizeToFit",
+                "lineWidth",
+                "lineCapStyle",
+                "frame",
+                "bounds",
+                "layer",
+                "shadowOpacity",
+                "shadowOffset",
+                "shadowColor",
+                "shadowRadius",
+                "removeFromSuperview"
+            };
+
+            foreach (string prop in capitalizeProperties)
+                //text = Regex.Replace(text, @"\b" + word + @"\b", word[0].ToString().ToUpperInvariant() + word.Substring(1));
+                text = text.Replace("." + prop, "." + prop[0].ToString().ToUpperInvariant() + prop.Substring(1));
+
+            text = Regex.Replace(text, @"^@property\s*?(\([^)]*?\))\s*?([a-zA-Z]*?)\s*?\*?([^\*]*?);$", "public $2 $3;", RegexOptions.Multiline);
 
             text = Regex.Replace(text, @"/\*[\w\W]*?\*/", "");
 
-            text = Regex.Replace(text, "^@implementation(.*?)$", "public class$1 {", RegexOptions.Multiline);
+            text = Regex.Replace(text, "^@implementation(.*?)$", "public class$1", RegexOptions.Multiline);
             text = text.Replace("@end", "}");
             text = Regex.Replace(text, @"\(CGPoint\)\d*?{([\w\W]*?)}", "new PointF($1)");
             text = Regex.Replace(text, @"\(CGRect\)\d*?{([\w\W]*?)}", "new RectangleF($1)");
-
-            text = Regex.Replace(text, @"\[UIFont boldSystemFontOfSize:(\d)+\]", @"UIFont.BoldSystemFontOfSize($1)");
-            text = Regex.Replace(text, @"\[UIFont systemFontOfSize:(\d)+\]", @"UIFont.SystemFontOfSize($1)");
 
             text = Regex.Replace(text, @"CGRectGetMinX\((.*?)\)", "$1.GetMinX()");
             text = Regex.Replace(text, @"CGRectGetMaxX\((.*?)\)", "$1.GetMaxX()");
@@ -196,12 +256,23 @@ namespace Sharpness
             text = Regex.Replace(text, @"CGContextAddRect\(([^,]*?),", "$1.AddRect(");
             text = Regex.Replace(text, @"CGContextSetRGBFillColor\(([^,]*?),", "$1.SetRGBFillColor(");
             text = Regex.Replace(text, @"CGContextDrawLinearGradient\s?\(([^,]*?),", "$1.DrawLinearGradient(");
+            text = Regex.Replace(text, @"CGContextDrawRadialGradient\s?\(([^,]*?),", "$1.DrawRadialGradient(");
+            text = Regex.Replace(text, @"CGContextSetLineWidth\s?\(([^,]*?),", "$1.SetLineWidth(");
+            text = Regex.Replace(text, @"CGContextFillEllipseInRect\s?\(([^,]*?),", "$1.FillEllipseInRect(");
+            text = Regex.Replace(text, @"CGContextStrokeEllipseInRect\s?\(([^,]*?),", "$1.StrokeEllipseInRect(");
+            text = Regex.Replace(text, @"CGContextMoveToPoint\s?\(([^,]*?),", "$1.MoveToPoint(");
+            text = Regex.Replace(text, @"CGContextAddArc\s?\(([^,]*?),", "$1.AddArc(");
+            text = Regex.Replace(text, @"CGContextSetFillColorWithColor\s?\(([^,]*?),", "$1.SetFillColorWithColor(");
+            text = Regex.Replace(text, @"CGContextSetGrayFillColor\s?\(([^,]*?),", "$1.SetGrayFillColor(");
+            
             
             text = Regex.Replace(text, @"CGContextFillPath\(([^\)]*?)\);", "$1.FillPath();");
+            text = Regex.Replace(text, @"CGContextClosePath\(([^\)]*?)\);", "$1.ClosePath();");
             text = Regex.Replace(text, @"CGContextSaveGState\(([^\)]*?)\);", "$1.SaveState();");
             text = Regex.Replace(text, @"CGContextRestoreGState\(([^\)]*?)\);", "$1.RestoreState();");
             text = Regex.Replace(text, @"CGContextClip\(([^\)]*?)\);", "$1.Clip();");
             text = Regex.Replace(text, @"(CGPathRelease|CGGradientRelease|CGColorSpaceRelease)\(([^\)]*?)\);", "$2.Dispose();");
+            text = Regex.Replace(text, @"UIGraphicsPushContext\(([^\)]*?)\);", "$1.Push();");
 
             var evaluator = new MatchEvaluator(match =>
             {
@@ -214,19 +285,22 @@ namespace Sharpness
             text = Regex.Replace(text, "^(@interface|#import).*?$", "", RegexOptions.Multiline);
             text = text.Trim();
             text = Regex.Replace(text, "\n{3,}", "\n\n");
-            text = text.Replace("self.", "this.")
+            text = text
+                .Replace("roundf", "Math.Round")
                 .Replace("PointFZero", "PointF.Empty")
+                .Replace("CGSizeZero", "SizeF.Empty")
                 .Replace("CGPointMake", "new PointF")
                 .Replace("CGRectMake", "new RectangleF")
                 .Replace("UIEdgeInsetsMake", "new UIEdgeInsets")
                 .Replace(" isNavigationBarHidden", "NavigationBarHidden")
                 .Replace(" navigationBar", ".NavigationBar")
                 .Replace("[UIApplication sharedApplication]", "UIApplication.SharedApplication")
-                .Replace("UIInterfaceOrientationIsPortrait(", "UIInterfaceOrientation.IsPortrait(")
                 .Replace(" statusBarOrientation", ".StatusBarOrientation")
-                .Replace(".view", ".View")
-                .Replace("[[UILabel alloc] init]", "new UILabel()")
+                .Replace(".statusBarOrientation", ".StatusBarOrientation")
+                .Replace("this.superview", "this.Superview")
                 .Replace(" setText:", ".Text = ")
+                .Replace(".boldSystemFontOfSize", ".BoldSystemFontOfSize")
+                .Replace(".systemFontOfSize", ".SystemFontOfSize")
                 .Replace("UIControlStateNormal", "UIControlState.Normal")
                 .Replace(" setBackgroundImage:", ".SetBackgroundImage(")
                 .Replace(" setTitle:", ".SetTitle(")
@@ -234,7 +308,6 @@ namespace Sharpness
                 .Replace(" setTextColor:", ".TextColor = ")
                 .Replace(" setBackgroundColor:", ".BackgroundColor = ")
                 .Replace(".contentEdgeInsets", ".ContentEdgeInsets")
-                .Replace(" sizeToFit]", ".SizeToFit()")
                 .Replace("[[UIView alloc] initWithFrame:", "new UIView(")
                 .Replace("UISwipeGestureRecognizerDirectionUp", "UISwipeGestureRecognizerDirection.Up")
                 .Replace("UISwipeGestureRecognizerDirectionDown", "UISwipeGestureRecognizerDirection.Down")
@@ -244,12 +317,9 @@ namespace Sharpness
                 .Replace(" setFont:", ".Font = ")
                 .Replace(" setShadowColor:", ".ShadowColor = ")
                 .Replace(" setShadowOffset:", ".ShadowOffset = ")
-                .Replace("[UIFont boldSystemFontOfSize:", "UIFont.BoldSystemFontOfSize(")
-                .Replace("[UIFont systemFontOfSize:", "UIFont.SystemFontOfSize(")
                 .Replace(".numberOfLines", ".Lines")
                 .Replace(".lineBreakMode", ".LineBreakMode")
                 .Replace("NSLineBreakByWordWrapping", "UILineBreakMode.WordWrap")
-                .Replace(" addSubview:", ".Add(")
                 .Replace("UIGraphicsBeginImageContextWithOptions", "UIGraphics.BeginImageContextWithOptions")
                 .Replace("UIGraphicsEndImageContext", "UIGraphics.EndImageContext")
                 .Replace("UIGraphicsGetImageFromCurrentImageContext", "UIGraphics.GetImageFromCurrentImageContext")
@@ -265,12 +335,15 @@ namespace Sharpness
                 .Replace("UIViewAutoresizingFlexibleHeight", "UIViewAutoresizing.FlexibleHeight")
                 .Replace("UIViewAutoresizingFlexibleTopMargin", "UIViewAutoresizing.FlexibleTopMargin")
                 .Replace("UIViewAutoresizingFlexibleBottomMargin", "UIViewAutoresizing.FlexibleBottomMargin")
-                .Replace(" count]", ".Count")
+                .Replace("UIViewAutoresizingFlexibleLeftMargin", "UIViewAutoresizing.FlexibleLeftMargin")
+                .Replace("UIViewAutoresizingFlexibleRightMargin", "UIViewAutoresizing.FlexibleRightMargin")
+                .Replace("CGAffineTransformIdentity", "CGAffineTransform.MakeIdentity")
+                .Replace("CGAffineTransformIdentity", "CGAffineTransform.MakeIdentity")
+                .Replace("CGAffineTransformMakeRotation", "CGAffineTransform.MakeRotation")
                 .Replace("[UIImage imageNamed:", "UIImage.FromName(")
                 .Replace("[[UIImageView alloc] initWithImage:", "new UIImageView(")
                 .Replace(" objectAtIndex:", "[")
                 .Replace("[[NSBundle mainBundle] resourcePath]", "NSBundle.MainBundle.ResourcePath")
-                .Replace("NSString", "string")
                 .Replace(".viewController", ".ViewController")
                 .Replace("BOOL ", " bool ")
                 .Replace("(BOOL)", "bool ")
@@ -288,11 +361,10 @@ namespace Sharpness
                 .Replace("CGRectZero", "RectangleF.Empty")
                 .Replace("UIViewAutoresizingNone", "UIViewAutoresizing.None")
                 .Replace("NSUInteger", "int")
-                .Replace("[self ", "this.")
-                .Replace("[self.", "this.")
                 .Replace(" removeFromSuperview", ".RemoveFromSuperview")
                 .Replace("MAX(", "Math.Max(")
                 .Replace("MIN(", "Math.Min(")
+                .Replace("M_PI", "Math.PI")
                 .Replace("CGColorSpaceRef", "CGColorSpace")
                 .Replace("CGColorSpaceCreateDeviceRGB", "CGColorSpace.CreateDeviceRGB")
                 .Replace("CGGradientRef", "CGGradient")
@@ -300,10 +372,9 @@ namespace Sharpness
                 .Replace(".autoresizingMask", ".AutoresizingMask")
                 .Replace(".backgroundColor", ".BackgroundColor")
                 .Replace(".opaque", ".Opaque")
-                .Replace(" NO", " false")
-                .Replace(" YES", " true")
                 .Replace(".image.size", ".Image.Size")
-                .Replace("[UIColor clearColor]", "UIColor.Clear")
+                .Replace("UIColor.clearColor()", "UIColor.Clear")
+                .Replace("UIColor.whiteColor()", "UIColor.White")
                 .Replace("CGFloat", "float")
                 .Replace(".size.width", ".Width")
                 .Replace(".size.height", ".Height")
@@ -313,13 +384,6 @@ namespace Sharpness
                 .Replace(".origin.y", ".Y")
                 .Replace(".x", ".X")
                 .Replace(".y", ".Y")
-                .Replace(".frame", ".Frame")
-                .Replace(".bounds", ".Bounds")
-                .Replace(".layer", ".Layer")
-                .Replace(".shadowOpacity", ".ShadowOpacity")
-                .Replace(".shadowOffset", ".ShadowOffset")
-                .Replace(".shadowColor", ".ShadowColor")
-                .Replace(".shadowRadius", ".ShadowRadius")
                 .Replace("CGSizeMake", "new SizeF")
                 .Replace("CGSize", "SizeF")
                 .Replace("CGRect", "RectangleF")
