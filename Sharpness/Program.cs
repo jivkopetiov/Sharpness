@@ -56,7 +56,7 @@ namespace Sharpness
     {
         static void Main(string[] args)
         {
-            TransformFile(@"..\..\MBProgressHUD.m", @"C:\Users\jivko\Downloads", null);
+            TransformFile(@"..\..\TKCalendarDayView.m", @"C:\Users\jivko\Downloads", null);
         }
 
         private static Metadata TransformFile(string filePath, string outputDir, Metadata metadata)
@@ -409,14 +409,20 @@ namespace Sharpness
                 }
                 else
                 {
-                    suffix = "f";
+                    // is certainly float 
+                    if (Regex.IsMatch(value, @"^[\.\df]*?$"))
+                    {
+                        if (!value.EndsWithOrdinalNoCase("f"))
+                            suffix = "f";
+                    }
+
                     type = "float";
                 }
 
-                return string.Format("public const {0} {1} = {2}{3};", type, variable, value);
+                return string.Format("public const {0} {1} = {2}{3};", type, variable, value, suffix);
             });
 
-            text = Regex.Replace(text, @"^#define ([a-zA-Z]*?) (.*?)$", defineEvaluator, RegexOptions.Multiline);
+            text = Regex.Replace(text, @"^#define ([_a-zA-Z]*?) (.*?)$", defineEvaluator, RegexOptions.Multiline);
             return text;
         }
     }
