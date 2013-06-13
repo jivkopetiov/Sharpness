@@ -167,6 +167,12 @@ namespace Sharpness
 
             text = ReplaceDefineStatements(text);
 
+            // one parameter function
+            text = Regex.Replace(text, @"-\s*\(([a-zA-Z_]*?)\s*\*?\)\s*([0-9a-zA-Z_]*?):\(([a-zA-Z_]*?)\s*\*?\)\s*([0-9a-zA-Z_]*?)\s*\{", "private $1 $2 ($3 $4) {");
+
+            // zero parameter function
+            text = Regex.Replace(text, @"-\s*\(([a-zA-Z_]*?)\s*\*?\)\s*([0-9a-zA-Z_]*?)\s*\{", "private $1 $2 () {");
+
             text = text.Replace("NSString", "string");
 
             // UILabel *label; -- remove star
@@ -201,6 +207,7 @@ namespace Sharpness
             text = Regex.Replace(text, @"\bself\b", "this");
             text = Regex.Replace(text, @"\bYES\b", "true");
             text = Regex.Replace(text, @"\bNO\b", "false");
+            text = Regex.Replace(text, @"\bBOOL\b", "bool");
             text = Regex.Replace(text, @"\bUIInterfaceOrientationPortraitUpsideDown\b", "UIInterfaceOrientation.PortraitUpsideDown");
             text = Regex.Replace(text, @"\bUIInterfaceOrientationPortrait\b", "UIInterfaceOrientation.Portrait");
             text = Regex.Replace(text, @"\bUIInterfaceOrientationLandscapeLeft\b", "UIInterfaceOrientation.LandscapeLeft");
@@ -224,6 +231,7 @@ namespace Sharpness
                 "shadowOffset",
                 "shadowColor",
                 "shadowRadius",
+                "shadowPath",
                 "removeFromSuperview"
             };
 
@@ -345,8 +353,6 @@ namespace Sharpness
                 .Replace(" objectAtIndex:", "[")
                 .Replace("[[NSBundle mainBundle] resourcePath]", "NSBundle.MainBundle.ResourcePath")
                 .Replace(".viewController", ".ViewController")
-                .Replace("BOOL ", " bool ")
-                .Replace("(BOOL)", "bool ")
                 .Replace("completion:^", ", delegate")
                 .Replace("[UIView animateWithDuration:", "UIView.Animate(")
                 .Replace("animations:^", ", delegate {")
