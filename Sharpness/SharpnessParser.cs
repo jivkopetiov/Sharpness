@@ -27,140 +27,16 @@ namespace Sharpness
         {
             text = ReplaceDefineStatements(text);
 
-            // two parameter function
-            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> <var5>:\(<varGen6> \*?\) <var7> \{", match =>
-            {
-                string param1 = match.Groups[1].Value;
-                string param2 = match.Groups[2].Value;
-                string param3 = match.Groups[3].Value;
-                string param4 = match.Groups[4].Value;
-                string param5 = match.Groups[5].Value;
-                string param6 = match.Groups[6].Value;
-                string param7 = match.Groups[7].Value;
-
-                GenericParamLogic(ref param1);
-                GenericParamLogic(ref param3);
-                GenericParamLogic(ref param6);
-
-                if (param1 == "id" && param2 == "initWithFrame" && param3 == "CGRect")
-                    return string.Format("private {0}(RectangleF {1}, {2} {3}) {{", ClassName, param4, param6, param7);
-
-                else if (param2 == "tableView" && param5 == "numberOfRowsInSection")
-                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, "RowsInSection", param3, param4, param6, param7);
-                else if (param2 == "tableView" && param5 == "cellForRowAtIndexPath")
-                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, "GetCell", param3, param4, param6, param7);
-                else if (param2 == "tableView" && param5 == "viewForHeaderInSection")
-                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, "ViewForHeader", param3, param4, param6, param7);
-                else if (param2 == "tableView" && param5 == "heightForRowAtIndexPath")
-                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, "HeightForRow", param3, param4, param6, param7);
-                else if (param2 == "tableView" && param5 == "didSelectRowAtIndexPath")
-                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, "RowSelected", param3, param4, param6, param7);
-
-                else
-                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, param2, param3, param4, param6, param7);
-            });
-
-            // three parameter function
-            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> <var5>:\(<varGen6> \*?\) <var7>  <var8>:\(<varGen9> \*?\) <var10> \{", match =>
-            {
-                string param1 = match.Groups[1].Value;
-                string param2 = match.Groups[2].Value;
-                string param3 = match.Groups[3].Value;
-                string param4 = match.Groups[4].Value;
-                string param5 = match.Groups[5].Value;
-                string param6 = match.Groups[6].Value;
-                string param7 = match.Groups[7].Value;
-                string param8 = match.Groups[8].Value;
-                string param9 = match.Groups[9].Value;
-                string param10 = match.Groups[10].Value;
-
-                GenericParamLogic(ref param1);
-                GenericParamLogic(ref param3);
-                GenericParamLogic(ref param6);
-                GenericParamLogic(ref param9);
-
-                return string.Format("private {0} {1}({2} {3}, {4} {5}, {6} {7}) {{", param1, param2, param3, param4, param6, param7, param9, param10);
-            });
-
-            // four parameter function
-            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> <var5>:\(<varGen6> \*?\) <var7>  <var8>:\(<varGen9> \*?\) <var10>  <var11>:\(<varGen12> \*?\) <var13> \{", match =>
-            {
-                string param1 = match.Groups[1].Value;
-                string param2 = match.Groups[2].Value;
-                string param3 = match.Groups[3].Value;
-                string param4 = match.Groups[4].Value;
-                string param5 = match.Groups[5].Value;
-                string param6 = match.Groups[6].Value;
-                string param7 = match.Groups[7].Value;
-                string param8 = match.Groups[8].Value;
-                string param9 = match.Groups[9].Value;
-                string param10 = match.Groups[10].Value;
-                string param11 = match.Groups[11].Value;
-                string param12 = match.Groups[12].Value;
-                string param13 = match.Groups[13].Value;
-
-                GenericParamLogic(ref param1);
-                GenericParamLogic(ref param3);
-                GenericParamLogic(ref param6);
-                GenericParamLogic(ref param9);
-                GenericParamLogic(ref param12);
-
-                return string.Format("private {0} {1}({2} {3}, {4} {5}, {6} {7}, {8} {9}) {{", param1, param2, param3, param4, param6, param7, param9, param10, param12, param13);
-            });
-
-            // one parameter function
-            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> \{", match =>
-            {
-                string param1 = match.Groups[1].Value;
-                string param2 = match.Groups[2].Value;
-                string param3 = match.Groups[3].Value;
-                string param4 = match.Groups[4].Value;
-
-                GenericParamLogic(ref param1);
-                GenericParamLogic(ref param3);
-
-                if (param1 == "id" && param2 == "initWithFrame" && param3 == "CGRect")
-                    return string.Format("private {0}(RectangleF {1}) {{", ClassName, param4);
-                else if (param1 == "id" && param2 == "initWithCoder" && param3 == "NSCoder")
-                    return string.Format("private {0}(NSCoder {1}) {{", ClassName, param4);
-                else
-                    return string.Format("private {0} {1}({2} {3}) {{", param1, param2, param3, param4);
-            });
-
-            // zero parameter function
-            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2> \{", match =>
-            {
-                string param1 = match.Groups[1].Value;
-                string param2 = match.Groups[2].Value;
-
-                if (param1 == "id" && param2 == "init")
-                    return string.Format("private {0}() {{", ClassName);
-                else
-                    return string.Format("private {0} {1}() {{", param1, param2);
-            });
+            MethodSignatures(ref text);
+            MethodInvocations(ref text);
 
             text = text.Replace("NSString", "string");
 
             // UILabel *label; -- remove star
             SmartReplace(ref text, @"^( <var> )\*(<var>; )$", "$1$2", RegexOptions.Multiline);
 
-            // [view addSubview:hud]; -> view.AddSubview(hud);
-            SmartReplace(ref text, @"\[<var1> addSubview:<var2>\];", "$1.Add($2);");
-
-            // [hud show:animated]; -> hud.show(animated);
-            SmartReplace(ref text, @"\[<var1> <var2>:<var3>\];", "$1.$2($3);");
-
-            // [this setupLabels]; -> this.setupLabels();
-            SmartReplace(ref text, @"\[<var1> <var2>\];", "$1.$2();");
-
             // CGRectInset(allRect, 2.0f, 2.0f); -> allRect.Inset(2.0f, 2.0f);
             SmartReplace(ref text, @"CGRectInset\(<varNum1>,", "$1.Inset(");
-
-            // [[UIColor alloc] initWithWhite:1.f alpha:1.f] -> UIColor.FromWhiteAlpha(1.f, 1.f)
-            SmartReplace(ref text, @"\[\[UIColor  alloc\] initWithWhite:([\d\.f]*?) alpha:([\d\.f]*?)\]", "UIColor.FromWhiteAlpha($1, $2)");
-
-            //[UIColor colorWithWhite:0 alpha:0.8]
-            SmartReplace(ref text, @"\[ UIColor  colorWithWhite: <varNum1>  alpha: <varNum2> \]", "UIColor.FromWhiteAlpha($1, $2)");
 
             // [keyPath isEqualToString:@"labelText"] -> keyPath == "labelText"
             SmartReplace(ref text, @"\[<var1> isEqualToString:@\""<var2>\""\]", @"$1 == ""$2""");
@@ -186,6 +62,7 @@ namespace Sharpness
             text = Regex.Replace(text, @"\bBOOL\b", "bool");
             text = Regex.Replace(text, @"\bNSInteger\b", "int");
             text = Regex.Replace(text, @"\bNSURL\b", "NSUrl");
+            text = Regex.Replace(text, @"\bcolorWithWhite\b", "FromWhiteAlpha");
 
             text = Regex.Replace(text, @"\bUIInterfaceOrientationPortraitUpsideDown\b", "UIInterfaceOrientation.PortraitUpsideDown");
             text = Regex.Replace(text, @"\bUIInterfaceOrientationPortrait\b", "UIInterfaceOrientation.Portrait");
@@ -198,7 +75,7 @@ namespace Sharpness
                 "setNeedsDisplay",
                 "setStroke",
                 "setFill",
-                "set",
+                //"set",
                 "stroke",
                 "sizeToFit",
                 "lineWidth",
@@ -386,6 +263,133 @@ namespace Sharpness
             return text;
         }
 
+        private void MethodInvocations(ref string text)
+        {
+            SmartReplace(ref text, @"\[ <varNum1>  <var2> \]", "$1.$2()");
+
+            SmartReplace(ref text, @"\[ <varNum1>  <var2> : <varNum3> \]", "$1.$2($3)");
+
+            SmartReplace(ref text, @"\[ <varNum1>  <var2> : <varNum3>  <var4> : <varNum5> \]", "$1.$2($3, $5)");
+
+            // [this setupLabels]; -> this.setupLabels();
+            SmartReplace(ref text, @"\[<var1> <var2>\];", "$1.$2();");
+        }
+
+        private void MethodSignatures(ref string text)
+        {
+            // two parameter function
+            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> <var5>:\(<varGen6> \*?\) <var7> \{", match =>
+            {
+                string param1 = match.Groups[1].Value;
+                string param2 = match.Groups[2].Value;
+                string param3 = match.Groups[3].Value;
+                string param4 = match.Groups[4].Value;
+                string param5 = match.Groups[5].Value;
+                string param6 = match.Groups[6].Value;
+                string param7 = match.Groups[7].Value;
+
+                GenericParamLogic(ref param1);
+                GenericParamLogic(ref param3);
+                GenericParamLogic(ref param6);
+
+                if (param1 == "id" && param2 == "initWithFrame" && param3 == "CGRect")
+                    return string.Format("private {0}(RectangleF {1}, {2} {3}) {{", ClassName, param4, param6, param7);
+
+                else if (param2 == "tableView" && param5 == "numberOfRowsInSection")
+                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, "RowsInSection", param3, param4, param6, param7);
+                else if (param2 == "tableView" && param5 == "cellForRowAtIndexPath")
+                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, "GetCell", param3, param4, param6, param7);
+                else if (param2 == "tableView" && param5 == "viewForHeaderInSection")
+                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, "ViewForHeader", param3, param4, param6, param7);
+                else if (param2 == "tableView" && param5 == "heightForRowAtIndexPath")
+                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, "HeightForRow", param3, param4, param6, param7);
+                else if (param2 == "tableView" && param5 == "didSelectRowAtIndexPath")
+                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, "RowSelected", param3, param4, param6, param7);
+
+                else
+                    return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, param2, param3, param4, param6, param7);
+            });
+
+            // three parameter function
+            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> <var5>:\(<varGen6> \*?\) <var7>  <var8>:\(<varGen9> \*?\) <var10> \{", match =>
+            {
+                string param1 = match.Groups[1].Value;
+                string param2 = match.Groups[2].Value;
+                string param3 = match.Groups[3].Value;
+                string param4 = match.Groups[4].Value;
+                string param5 = match.Groups[5].Value;
+                string param6 = match.Groups[6].Value;
+                string param7 = match.Groups[7].Value;
+                string param8 = match.Groups[8].Value;
+                string param9 = match.Groups[9].Value;
+                string param10 = match.Groups[10].Value;
+
+                GenericParamLogic(ref param1);
+                GenericParamLogic(ref param3);
+                GenericParamLogic(ref param6);
+                GenericParamLogic(ref param9);
+
+                return string.Format("private {0} {1}({2} {3}, {4} {5}, {6} {7}) {{", param1, param2, param3, param4, param6, param7, param9, param10);
+            });
+
+            // four parameter function
+            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> <var5>:\(<varGen6> \*?\) <var7>  <var8>:\(<varGen9> \*?\) <var10>  <var11>:\(<varGen12> \*?\) <var13> \{", match =>
+            {
+                string param1 = match.Groups[1].Value;
+                string param2 = match.Groups[2].Value;
+                string param3 = match.Groups[3].Value;
+                string param4 = match.Groups[4].Value;
+                string param5 = match.Groups[5].Value;
+                string param6 = match.Groups[6].Value;
+                string param7 = match.Groups[7].Value;
+                string param8 = match.Groups[8].Value;
+                string param9 = match.Groups[9].Value;
+                string param10 = match.Groups[10].Value;
+                string param11 = match.Groups[11].Value;
+                string param12 = match.Groups[12].Value;
+                string param13 = match.Groups[13].Value;
+
+                GenericParamLogic(ref param1);
+                GenericParamLogic(ref param3);
+                GenericParamLogic(ref param6);
+                GenericParamLogic(ref param9);
+                GenericParamLogic(ref param12);
+
+                return string.Format("private {0} {1}({2} {3}, {4} {5}, {6} {7}, {8} {9}) {{", param1, param2, param3, param4, param6, param7, param9, param10, param12, param13);
+            });
+
+            // one parameter function
+            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> \{", match =>
+            {
+                string param1 = match.Groups[1].Value;
+                string param2 = match.Groups[2].Value;
+                string param3 = match.Groups[3].Value;
+                string param4 = match.Groups[4].Value;
+
+                GenericParamLogic(ref param1);
+                GenericParamLogic(ref param3);
+
+                if (param1 == "id" && param2 == "initWithFrame" && param3 == "CGRect")
+                    return string.Format("private {0}(RectangleF {1}) {{", ClassName, param4);
+                else if (param1 == "id" && param2 == "initWithCoder" && param3 == "NSCoder")
+                    return string.Format("private {0}(NSCoder {1}) {{", ClassName, param4);
+                else
+                    return string.Format("private {0} {1}({2} {3}) {{", param1, param2, param3, param4);
+            });
+
+            // zero parameter function
+            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2> \{", match =>
+            {
+                string param1 = match.Groups[1].Value;
+                string param2 = match.Groups[2].Value;
+
+                if (param1 == "id" && param2 == "init")
+                    return string.Format("private {0}() {{", ClassName);
+                else
+                    return string.Format("private {0} {1}() {{", param1, param2);
+            });
+        }
+
         private void GenericParamLogic(ref string p)
         {
             if (p.StartsWithOrdinalNoCase("id<") && p.EndsWithOrdinalNoCase(">"))
@@ -527,7 +531,7 @@ namespace Sharpness
         {
             string varIdentifier = @"[0-9a-zA-Z_]*?";
             string varGenIdentifier = @"[0-9a-zA-Z_<>]*?";
-            string varNumIdentifier = @"[0-9a-zA-Z_\./]*?";
+            string varNumIdentifier = @"[0-9a-zA-Z_\./\+\-\*]*?";
 
             regex = regex.Replace("  ", @"\s+")
                         .Replace(" ", @"\s*")
