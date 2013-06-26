@@ -15,6 +15,7 @@ namespace Sharpness.Tests
         [TestCase("[self setCurrentCoverAtIndex:index animated:NO]", Result = "this.setCurrentCoverAtIndex(index, false)")]
         [TestCase("[self.coverflowDataSource numberOfCoversInCoverflowView:self]", Result = "this.coverflowDataSource.numberOfCoversInCoverflowView(this)")]
         [TestCase("[v.Layer removeAllAnimations]", Result = "v.Layer.removeAllAnimations()")]
+        [TestCase("[self _calculatedIndexWithContentOffset:*targetContentOffset]", Result = "this._calculatedIndexWithContentOffset(targetContentOffset)")]
         public string Tests(string input)
         {
             return new SharpnessParser().Parse(input);

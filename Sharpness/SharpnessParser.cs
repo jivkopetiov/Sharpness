@@ -29,11 +29,14 @@ namespace Sharpness
 
             var guids = new Dictionary<string, string>();
 
-            text = Regex.Replace(text, @"\[[a-zA-Z_]*?\s?alloc\s*]", match => {
+            text = Regex.Replace(text, @"\[[a-zA-Z_]*?\s?alloc\s*]", match =>
+            {
                 string g = "_" + Guid.NewGuid().ToString().Replace("-", "") + "_";
                 guids.Add(g, match.Value);
                 return g;
             });
+
+            text = text.Replace("[NSNull null]", "null");
 
             MethodSignatures(ref text);
             MethodInvocations(ref text);
@@ -65,22 +68,27 @@ namespace Sharpness
             //UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, NOB_SIZE, NOB_SIZE)];
             SmartReplace(ref text, @"UIImageView  \*<var1> = \[\[ UIImageView  alloc \]  initWithFrame : ([^\]]*?) \];", "UIImageView $1 = new UIImageView($2);");
 
-            // word replacements, nill, self, YES, NO
-            text = Regex.Replace(text, @"\bnil\b", "null");
-            text = Regex.Replace(text, @"\bself\b", "this");
-            text = Regex.Replace(text, @"\bYES\b", "true");
-            text = Regex.Replace(text, @"\bNO\b", "false");
-            text = Regex.Replace(text, @"\bBOOL\b", "bool");
-            text = Regex.Replace(text, @"\bNSInteger\b", "int");
-            text = Regex.Replace(text, @"\bNSURL\b", "NSUrl");
-            text = Regex.Replace(text, @"\bcolorWithWhite\b", "FromWhiteAlpha");
+            var wordReplacements = new Dictionary<string, string> {
+                { "nil", "null" },
+                { "self", "this" },
+                { "YES", "true" },
+                { "NO", "false" },
+                { "BOOL", "bool" },
+                { "NSInteger", "int" },
+                { "NSURL", "NSUrl" },
+                { "colorWithWhite", "FromWhiteAlpha" },
+                { "NSMakeRange", "new NSRange" },
+                { "rintf", "Math.Round" },
+                { "UIInterfaceOrientationPortraitUpsideDown", "UIInterfaceOrientation.PortraitUpsideDown" }, 
+                { "UIInterfaceOrientationPortrait", "UIInterfaceOrientation.Portrait" }, 
+                { "UIInterfaceOrientationLandscapeLeft", "UIInterfaceOrientation.LandscapeLeft" }, 
+                { "UIInterfaceOrientationLandscapeRight", "UIInterfaceOrientation.LandscapeRight" }, 
+                { "UIInterfaceOrientationIsLandscape", "UIInterfaceOrientation.IsLandscape" }, 
+                { "UIInterfaceOrientationIsPortrait", "UIInterfaceOrientation.IsPortrait" }, 
+            };
 
-            text = Regex.Replace(text, @"\bUIInterfaceOrientationPortraitUpsideDown\b", "UIInterfaceOrientation.PortraitUpsideDown");
-            text = Regex.Replace(text, @"\bUIInterfaceOrientationPortrait\b", "UIInterfaceOrientation.Portrait");
-            text = Regex.Replace(text, @"\bUIInterfaceOrientationLandscapeLeft\b", "UIInterfaceOrientation.LandscapeLeft");
-            text = Regex.Replace(text, @"\bUIInterfaceOrientationLandscapeRight\b", "UIInterfaceOrientation.LandscapeRight");
-            text = Regex.Replace(text, @"\bUIInterfaceOrientationIsLandscape\b", "UIInterfaceOrientation.IsLandscape");
-            text = Regex.Replace(text, @"\bUIInterfaceOrientationIsPortrait\b", "UIInterfaceOrientation.IsPortrait");
+            foreach (string key in wordReplacements.Keys)
+                text = Regex.Replace(text, @"\b" + key + @"\b", wordReplacements[key]);
 
             var capitalizeProperties = new[] { 
                 "setNeedsDisplay",
@@ -278,9 +286,9 @@ namespace Sharpness
         {
             SmartReplace(ref text, @"\[ <varNum1>  <var2> \]", "$1.$2()");
 
-            SmartReplace(ref text, @"\[ <varNum1>  <var2> : <varNum3> \]", "$1.$2($3)");
+            SmartReplace(ref text, @"\[ <varNum1>  <var2> : \*?<varNum3> \]", "$1.$2($3)");
 
-            SmartReplace(ref text, @"\[ <varNum1>  <var2> : <varNum3>  <var4> : <varNum5> \]", "$1.$2($3, $5)");
+            SmartReplace(ref text, @"\[ <varNum1>  <var2> : \*?<varNum3>  <var4> : \*?<varNum5> \]", "$1.$2($3, $5)");
 
             // [this setupLabels]; -> this.setupLabels();
             SmartReplace(ref text, @"\[<var1> <var2>\];", "$1.$2();");
