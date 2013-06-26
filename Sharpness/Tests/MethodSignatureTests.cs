@@ -18,6 +18,13 @@ namespace Sharpness.Tests
             return new SharpnessParser().Parse(input);
         }
 
+        [TestCase("- (void) _scrollToTopEvent:(BOOL)animated{", Result = "private void _scrollToTopEvent(bool animated) {")]
+        [TestCase("- (TKTimelineView*) _timelineWithScrollView:(UIScrollView*)sv{", Result = "private TKTimelineView _timelineWithScrollView(UIScrollView sv) {")]
+        public string OneParam(string input)
+        {
+            return new SharpnessParser().Parse(input);
+        }
+
         [TestCase("- (void) _movePagesToIndex:(NSInteger)nowPage animated:(BOOL)animated{",
             Result = "private void _movePagesToIndex(int nowPage, bool animated) {")]
         [TestCase("-(void)updateForPinchScale:(CGFloat)scale atIndexPath:(NSIndexPath*)indexPath {",
@@ -27,10 +34,9 @@ namespace Sharpness.Tests
             return new SharpnessParser().Parse(input);
         }
 
-
-        [TestCase("- (void) _scrollToTopEvent:(BOOL)animated{", Result = "private void _scrollToTopEvent(bool animated) {")]
-        [TestCase("- (TKTimelineView*) _timelineWithScrollView:(UIScrollView*)sv{", Result = "private TKTimelineView _timelineWithScrollView(UIScrollView sv) {")]
-        public string OneParam(string input)
+        [TestCase("- (UIImage*) imageForKey:(string*)key url:(NSURL*)url queueIfNeeded:(bool)queueIfNeeded{",
+            Result = "private UIImage imageForKey(string key, NSUrl url, bool queueIfNeeded) {")]
+        public string ThreeParams(string input)
         {
             return new SharpnessParser().Parse(input);
         }
@@ -79,7 +85,5 @@ namespace Sharpness.Tests
         {
             return new SharpnessParser().Parse(input);
         }
-   
-        
     }
 }

@@ -56,8 +56,22 @@ namespace Sharpness
                     return string.Format("private {0} {1}({2} {3}, {4} {5}) {{", param1, param2, param3, param4, param6, param7);
             });
 
+            // three parameter function
+            SmartReplace(ref text, @"- \( <var1> \*?\) <var2>:\(<var3> \*?\) <var4> <var5>:\(<var6> \*?\) <var7>  <var8>:\(<var9> \*?\) <var10> \{", match =>
+            {
+                string param1 = match.Groups[1].Value;
+                string param2 = match.Groups[2].Value;
+                string param3 = match.Groups[3].Value;
+                string param4 = match.Groups[4].Value;
+                string param5 = match.Groups[5].Value;
+                string param6 = match.Groups[6].Value;
+                string param7 = match.Groups[7].Value;
+                string param8 = match.Groups[8].Value;
+                string param9 = match.Groups[9].Value;
+                string param10 = match.Groups[10].Value;
 
-
+                return string.Format("private {0} {1}({2} {3}, {4} {5}, {6} {7}) {{", param1, param2, param3, param4, param6, param7, param9, param10);
+            });
 
             //- (void) _movePagesToIndex:(NSInteger)nowPage animated:(bool)animated{
 
@@ -135,6 +149,7 @@ namespace Sharpness
             text = Regex.Replace(text, @"\bNO\b", "false");
             text = Regex.Replace(text, @"\bBOOL\b", "bool");
             text = Regex.Replace(text, @"\bNSInteger\b", "int");
+            text = Regex.Replace(text, @"\bNSURL\b", "NSUrl");
 
             text = Regex.Replace(text, @"\bUIInterfaceOrientationPortraitUpsideDown\b", "UIInterfaceOrientation.PortraitUpsideDown");
             text = Regex.Replace(text, @"\bUIInterfaceOrientationPortrait\b", "UIInterfaceOrientation.Portrait");
