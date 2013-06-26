@@ -27,8 +27,19 @@ namespace Sharpness
         {
             text = ReplaceDefineStatements(text);
 
+            var guids = new Dictionary<string, string>();
+
+            text = Regex.Replace(text, @"\[[a-zA-Z_]*?\s?alloc\s*]", match => {
+                string g = "_" + Guid.NewGuid().ToString().Replace("-", "") + "_";
+                guids.Add(g, match.Value);
+                return g;
+            });
+
             MethodSignatures(ref text);
             MethodInvocations(ref text);
+
+            foreach (string key in guids.Keys)
+                text = text.Replace(key, guids[key]);
 
             text = text.Replace("NSString", "string");
 
