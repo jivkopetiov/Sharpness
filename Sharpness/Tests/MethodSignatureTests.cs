@@ -20,6 +20,8 @@ namespace Sharpness.Tests
 
         [TestCase("- (void) _scrollToTopEvent:(BOOL)animated{", Result = "private void _scrollToTopEvent(bool animated) {")]
         [TestCase("- (TKTimelineView*) _timelineWithScrollView:(UIScrollView*)sv{", Result = "private TKTimelineView _timelineWithScrollView(UIScrollView sv) {")]
+        [TestCase("- (void) setCoverflowDataSource:(id<TKCoverflowViewDataSource>)coverflowDataSource{",
+            Result = "private void setCoverflowDataSource(TKCoverflowViewDataSource coverflowDataSource) {")]
         public string OneParam(string input)
         {
             return new SharpnessParser().Parse(input);

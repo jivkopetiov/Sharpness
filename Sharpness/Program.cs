@@ -32,7 +32,7 @@ namespace Sharpness
         static void Main(string[] args)
         {
             new SharpnessParser().ParseFile(
-@"C:\Users\jivko\Downloads\sharpness\tapkulibrary-master\tapkulibrary-master\src\TapkuLibrary\TKImageCache.m", @"C:\Users\Jivko\Downloads");
+@"C:\Users\jivko\Downloads\sharpness\tapkulibrary-master\tapkulibrary-master\src\TapkuLibrary\TKCoverflowView.m", @"C:\Users\Jivko\Downloads");
         }
     }
 }

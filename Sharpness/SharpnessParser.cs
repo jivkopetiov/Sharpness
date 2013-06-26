@@ -28,7 +28,7 @@ namespace Sharpness
             text = ReplaceDefineStatements(text);
 
             // two parameter function
-            SmartReplace(ref text, @"- \( <var1> \*?\) <var2>:\(<var3> \*?\) <var4> <var5>:\(<var6> \*?\) <var7> \{", match =>
+            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> <var5>:\(<varGen6> \*?\) <var7> \{", match =>
             {
                 string param1 = match.Groups[1].Value;
                 string param2 = match.Groups[2].Value;
@@ -37,6 +37,10 @@ namespace Sharpness
                 string param5 = match.Groups[5].Value;
                 string param6 = match.Groups[6].Value;
                 string param7 = match.Groups[7].Value;
+
+                GenericParamLogic(ref param1);
+                GenericParamLogic(ref param3);
+                GenericParamLogic(ref param6);
 
                 if (param1 == "id" && param2 == "initWithFrame" && param3 == "CGRect")
                     return string.Format("private {0}(RectangleF {1}, {2} {3}) {{", ClassName, param4, param6, param7);
@@ -57,7 +61,7 @@ namespace Sharpness
             });
 
             // three parameter function
-            SmartReplace(ref text, @"- \( <var1> \*?\) <var2>:\(<var3> \*?\) <var4> <var5>:\(<var6> \*?\) <var7>  <var8>:\(<var9> \*?\) <var10> \{", match =>
+            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> <var5>:\(<varGen6> \*?\) <var7>  <var8>:\(<varGen9> \*?\) <var10> \{", match =>
             {
                 string param1 = match.Groups[1].Value;
                 string param2 = match.Groups[2].Value;
@@ -70,11 +74,16 @@ namespace Sharpness
                 string param9 = match.Groups[9].Value;
                 string param10 = match.Groups[10].Value;
 
+                GenericParamLogic(ref param1);
+                GenericParamLogic(ref param3);
+                GenericParamLogic(ref param6);
+                GenericParamLogic(ref param9);
+
                 return string.Format("private {0} {1}({2} {3}, {4} {5}, {6} {7}) {{", param1, param2, param3, param4, param6, param7, param9, param10);
             });
 
             // four parameter function
-            SmartReplace(ref text, @"- \( <var1> \*?\) <var2>:\(<var3> \*?\) <var4> <var5>:\(<var6> \*?\) <var7>  <var8>:\(<var9> \*?\) <var10>  <var11>:\(<var12> \*?\) <var13> \{", match =>
+            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> <var5>:\(<varGen6> \*?\) <var7>  <var8>:\(<varGen9> \*?\) <var10>  <var11>:\(<varGen12> \*?\) <var13> \{", match =>
             {
                 string param1 = match.Groups[1].Value;
                 string param2 = match.Groups[2].Value;
@@ -90,16 +99,25 @@ namespace Sharpness
                 string param12 = match.Groups[12].Value;
                 string param13 = match.Groups[13].Value;
 
+                GenericParamLogic(ref param1);
+                GenericParamLogic(ref param3);
+                GenericParamLogic(ref param6);
+                GenericParamLogic(ref param9);
+                GenericParamLogic(ref param12);
+
                 return string.Format("private {0} {1}({2} {3}, {4} {5}, {6} {7}, {8} {9}) {{", param1, param2, param3, param4, param6, param7, param9, param10, param12, param13);
             });
 
             // one parameter function
-            SmartReplace(ref text, @"- \( <var1> \*?\) <var2>:\(<var3> \*?\) <var4> \{", match =>
+            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2>:\(<varGen3> \*?\) <var4> \{", match =>
             {
                 string param1 = match.Groups[1].Value;
                 string param2 = match.Groups[2].Value;
                 string param3 = match.Groups[3].Value;
                 string param4 = match.Groups[4].Value;
+
+                GenericParamLogic(ref param1);
+                GenericParamLogic(ref param3);
 
                 if (param1 == "id" && param2 == "initWithFrame" && param3 == "CGRect")
                     return string.Format("private {0}(RectangleF {1}) {{", ClassName, param4);
@@ -110,7 +128,7 @@ namespace Sharpness
             });
 
             // zero parameter function
-            SmartReplace(ref text, @"- \( <var1> \*?\) <var2> \{", match =>
+            SmartReplace(ref text, @"- \( <varGen1> \*?\) <var2> \{", match =>
             {
                 string param1 = match.Groups[1].Value;
                 string param2 = match.Groups[2].Value;
@@ -368,6 +386,12 @@ namespace Sharpness
             return text;
         }
 
+        private void GenericParamLogic(ref string p)
+        {
+            if (p.StartsWithOrdinalNoCase("id<") && p.EndsWithOrdinalNoCase(">"))
+                p = p.Substring(3, p.Length - 4);
+        }
+
         private Metadata TransformFile(string filePath, string outputDir, Metadata metadata)
         {
             var f = new FileInfo(filePath);
@@ -502,15 +526,18 @@ namespace Sharpness
         private static string NormalizeRegex(string regex)
         {
             string varIdentifier = @"[0-9a-zA-Z_]*?";
+            string varGenIdentifier = @"[0-9a-zA-Z_<>]*?";
             string varNumIdentifier = @"[0-9a-zA-Z_\./]*?";
 
             regex = regex.Replace("  ", @"\s+")
                         .Replace(" ", @"\s*")
                         .Replace("<var>", varIdentifier)
-                        .Replace("<varNum>", varIdentifier);
+                        .Replace("<varNum>", varNumIdentifier)
+                        .Replace("<varGen>", varGenIdentifier);
 
             regex = Regex.Replace(regex, @"<var\d{1,2}>", "(" + varIdentifier + ")");
             regex = Regex.Replace(regex, @"<varNum\d{1,2}>", "(" + varNumIdentifier + ")");
+            regex = Regex.Replace(regex, @"<varGen(\d{1,2})>", "(" + varGenIdentifier + ")");
 
             return regex;
         }
