@@ -41,6 +41,14 @@ namespace Sharpness.Tests
             return new SharpnessParser().Parse(input);
         }
 
+        [TestCase("- (UIImage*) imageForKey:(string*)key url:(NSUrl*)url queueIfNeeded:(bool)queueIfNeeded tag:(int)tag{",
+            Result = "private UIImage imageForKey(string key, NSUrl url, bool queueIfNeeded, int tag) {")]
+        public string FourParams(string input)
+        {
+            return new SharpnessParser().Parse(input);
+        }
+        
+
         [TestCase("- (id) initWithFrame:(CGRect)frame{", Result = "private ClassName(RectangleF frame) {")]
         [TestCase("- (id) initWithCoder:(NSCoder *)decoder{", Result = "private ClassName(NSCoder decoder) {")]
         [TestCase("- (id) init{", Result = "private ClassName() {")]
