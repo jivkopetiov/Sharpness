@@ -104,7 +104,7 @@ namespace Sharpness
             SmartReplace(ref text, @"\[<var1> <var2>\];", "$1.$2();");
 
             // CGRectInset(allRect, 2.0f, 2.0f); -> allRect.Inset(2.0f, 2.0f);
-            SmartReplace(ref text, @"CGRectInset\(<var>,", "$1.Inset(");
+            SmartReplace(ref text, @"CGRectInset\(<varNum1>,", "$1.Inset(");
 
             // [[UIColor alloc] initWithWhite:1.f alpha:1.f] -> UIColor.FromWhiteAlpha(1.f, 1.f)
             SmartReplace(ref text, @"\[\[UIColor  alloc\] initWithWhite:([\d\.f]*?) alpha:([\d\.f]*?)\]", "UIColor.FromWhiteAlpha($1, $2)");
@@ -125,6 +125,8 @@ namespace Sharpness
             SmartReplace(ref text, @"\[ UIFont  boldSystemFontOfSize : <varNum1> \]", "UIFont.BoldSystemFontOfSize($1)");
             SmartReplace(ref text, @"\[ UIFont  systemFontOfSize : <varNum1> \]", "UIFont.SystemFontOfSize($1)");
 
+            //UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, NOB_SIZE, NOB_SIZE)];
+            SmartReplace(ref text, @"UIImageView  \*<var1> = \[\[ UIImageView  alloc \]  initWithFrame : ([^\]]*?) \];", "UIImageView $1 = new UIImageView($2);");
 
             // word replacements, nill, self, YES, NO
             text = Regex.Replace(text, @"\bnil\b", "null");
@@ -467,7 +469,7 @@ namespace Sharpness
         private static string NormalizeRegex(string regex)
         {
             string varIdentifier = @"[0-9a-zA-Z_]*?";
-            string varNumIdentifier = @"[0-9a-zA-Z_\.]*?";
+            string varNumIdentifier = @"[0-9a-zA-Z_\./]*?";
 
             regex = regex.Replace("  ", @"\s+")
                         .Replace(" ", @"\s*")

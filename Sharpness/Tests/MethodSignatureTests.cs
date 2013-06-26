@@ -60,6 +60,7 @@ namespace Sharpness.Tests
         }
 
         [TestCase("[UIColor colorWithWhite:0 alpha:0.8]", Result = "UIColor.FromWhiteAlpha(0, 0.8)")]
+        [TestCase("[UIColor colorWithWhite:102/255. alpha:1]", Result = "UIColor.FromWhiteAlpha(102/255., 1)")]
         public string UIColor(string input)
         {
             return new SharpnessParser().Parse(input);
@@ -71,6 +72,14 @@ namespace Sharpness.Tests
         {
             return new SharpnessParser().Parse(input);
         }
+
+        [TestCase("UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, NOB_SIZE, NOB_SIZE)];",
+            Result = "UIImageView iv = new UIImageView(new RectangleF(0,0, NOB_SIZE, NOB_SIZE));")]
+        public string UIImageView(string input)
+        {
+            return new SharpnessParser().Parse(input);
+        }
+   
         
     }
 }
