@@ -422,6 +422,8 @@ namespace Sharpness
                 string param1 = match.Groups[1].Value;
                 string param2 = match.Groups[2].Value;
 
+                GenericParamLogic(ref param1);
+
                 if (param1 == "id" && param2 == "init")
                     return string.Format("private {0}() {{", ClassName);
                 else
@@ -433,6 +435,8 @@ namespace Sharpness
         {
             if (p.StartsWithOrdinalNoCase("id<") && p.EndsWithOrdinalNoCase(">"))
                 p = p.Substring(3, p.Length - 4);
+            else if (p.StartsWithOrdinalNoCase("id <") && p.EndsWithOrdinalNoCase(">"))
+                p = p.Substring(4, p.Length - 5);
         }
 
         private Metadata TransformFile(string filePath, string outputDir, Metadata metadata)
@@ -569,7 +573,7 @@ namespace Sharpness
         private static string NormalizeRegex(string regex)
         {
             string varIdentifier = @"[0-9a-zA-Z_]*?";
-            string varGenIdentifier = @"[0-9a-zA-Z_<>]*?";
+            string varGenIdentifier = @"[0-9a-zA-Z_<> ]*?";
             string varNumIdentifier = @"[0-9a-zA-Z_\./\+\-\*]*?";
 
             regex = regex.Replace("  ", @"\s+")

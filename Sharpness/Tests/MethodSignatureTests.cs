@@ -17,6 +17,7 @@ namespace Sharpness.Tests
         [TestCase("- (void) _setupView{", Result = "private void _setupView() {")]
         [TestCase("     -(void) didMoveToWindow {", Result = "private void didMoveToWindow() {")]
         [TestCase("- (void)viewDidLoad {", Result = "private void viewDidLoad() {")]
+        [TestCase("- (id <PSTreeGraphModelNode> ) singleSelectedModelNode {", Result = "private PSTreeGraphModelNode singleSelectedModelNode() {")]
         public string NoParams(string input)
         {
             return new SharpnessParser().Parse(input);
