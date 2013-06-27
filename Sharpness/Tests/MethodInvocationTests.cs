@@ -23,6 +23,7 @@ namespace Sharpness.Tests
 
         [TestCase("[UIColor colorWithWhite:0 alpha:0.8]", Result = "UIColor.FromWhiteAlpha(0, 0.8)")]
         [TestCase("[UIColor colorWithWhite:102/255. alpha:1]", Result = "UIColor.FromWhiteAlpha(102/255., 1)")]
+        [TestCase("[UIColor colorWithRed:0.55 green:0.76 blue:0.93 alpha:1.0]", Result = "UIColor.FromRGBA(0.55, 0.76, 0.93, 1.0)")]
         public string UIColor(string input)
         {
             return new SharpnessParser().Parse(input);

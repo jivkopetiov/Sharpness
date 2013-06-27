@@ -40,6 +40,7 @@ namespace Sharpness
 
             MethodSignatures(ref text);
             MethodInvocations(ref text);
+            UIColorManipulations(ref text);
 
             foreach (string key in guids.Keys)
                 text = text.Replace(key, guids[key]);
@@ -175,13 +176,6 @@ namespace Sharpness
             text = Regex.Replace(text, @"(CGPathRelease|CGGradientRelease|CGColorSpaceRelease)\(([^\)]*?)\);", "$2.Dispose();");
             text = Regex.Replace(text, @"UIGraphicsPushContext\(([^\)]*?)\);", "$1.Push();");
 
-            var evaluator = new MatchEvaluator(match =>
-            {
-                string v = match.Groups[1].Value;
-                return "UIColor." + v[0].ToString().ToUpperInvariant() + v.Substring(1);
-            });
-            text = Regex.Replace(text, @"\[UIColor ([a-zA-Z]*?)Color\]", evaluator);
-
             text = Regex.Replace(text, "^//.*?$", "", RegexOptions.Multiline);
             text = Regex.Replace(text, "^(@interface|#import).*?$", "", RegexOptions.Multiline);
             text = text.Trim();
@@ -207,7 +201,7 @@ namespace Sharpness
                 .Replace(" setTitle:", ".SetTitle(")
                 .Replace(" setTitleColor:", ".SetTitleColor(")
                 .Replace(" setTextColor:", ".TextColor = ")
-                .Replace(" setBackgroundColor:", ".BackgroundColor = ")
+                //.Replace(" setBackgroundColor:", ".BackgroundColor = ")
                 .Replace(".contentEdgeInsets", ".ContentEdgeInsets")
                 .Replace("[[UIView alloc] initWithFrame:", "new UIView(")
                 .Replace("[UIScreen mainScreen]", "UIScreen.MainScreen")
@@ -274,8 +268,6 @@ namespace Sharpness
                 .Replace(".backgroundColor", ".BackgroundColor")
                 .Replace(".opaque", ".Opaque")
                 .Replace(".image.size", ".Image.Size")
-                .Replace("UIColor.clearColor()", "UIColor.Clear")
-                .Replace("UIColor.whiteColor()", "UIColor.White")
                 .Replace("CGFloat", "float")
                 .Replace(".size.width", ".Width")
                 .Replace(".size.height", ".Height")
@@ -293,6 +285,21 @@ namespace Sharpness
                 ;
 
             return text;
+        }
+
+        private void UIColorManipulations(ref string text)
+        {
+            var evaluator = new MatchEvaluator(match =>
+            {
+                string v = match.Groups[1].Value;
+                return "UIColor." + v[0].ToString().ToUpperInvariant() + v.Substring(1);
+            });
+            text = Regex.Replace(text, @"\[UIColor ([a-zA-Z]*?)Color\]", evaluator);
+
+            SmartReplace(ref text, @"\[ UIColor  colorWithRed : ([\d\.fd]*)  green : ([\d\.fd]*)  blue : ([\d\.fd]*)  alpha : ([\d\.fd]*) \]", "UIColor.FromRGBA($1, $2, $3, $4)");
+
+            text = text.Replace("UIColor.clearColor()", "UIColor.Clear")
+                .Replace("UIColor.whiteColor()", "UIColor.White");
         }
 
         private void MethodInvocations(ref string text)
