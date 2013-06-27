@@ -45,10 +45,7 @@ namespace Sharpness
                 text = text.Replace(key, guids[key]);
 
             text = text.Replace("NSString", "string");
-
-            // UILabel *label; -- remove star
-            SmartReplace(ref text, @"^( <var> )\*(<var>; )$", "$1$2", RegexOptions.Multiline);
-
+            
             // CGRectInset(allRect, 2.0f, 2.0f); -> allRect.Inset(2.0f, 2.0f);
             SmartReplace(ref text, @"CGRectInset\(<varNum1>,", "$1.Inset(");
 
@@ -68,13 +65,19 @@ namespace Sharpness
             //UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, NOB_SIZE, NOB_SIZE)];
             SmartReplace(ref text, @"UIImageView  \*<var1> = \[\[ UIImageView  alloc \]  initWithFrame : ([^\]]*?) \];", "UIImageView $1 = new UIImageView($2);");
 
+            // UILabel *label; -- remove star
+            SmartReplace(ref text, @"^( <var> )\*(<var>; )$", "$1$2", RegexOptions.Multiline);
+            SmartReplace(ref text, @"^( <var> )\*(<var> = .*? ;)$", "$1$2", RegexOptions.Multiline);
+
             var wordReplacements = new Dictionary<string, string> {
                 { "nil", "null" },
                 { "self", "this" },
+                { "super", "base" },
                 { "YES", "true" },
                 { "NO", "false" },
                 { "BOOL", "bool" },
                 { "NSInteger", "int" },
+                { "NSNumber", "float" },
                 { "NSURL", "NSUrl" },
                 { "colorWithWhite", "FromWhiteAlpha" },
                 { "NSMakeRange", "new NSRange" },
@@ -90,11 +93,22 @@ namespace Sharpness
             foreach (string key in wordReplacements.Keys)
                 text = Regex.Replace(text, @"\b" + key + @"\b", wordReplacements[key]);
 
-            var capitalizeProperties = new[] { 
+            var capitalizeKeywords = new[] { 
                 "setNeedsDisplay",
+                "viewDidLoad",
+                "canSendMail",
+                "dequeueReusableHeaderFooterViewWithIdentifier",
+                "deselectRowAtIndexPath",
+                "viewWillAppear",
+                "numberOfSectionsInTableView",
+                "addSubview",
+                "removeFromSuperview",
+                "setNeedsLayout",
+                "addGestureRecognizer",
+                "anyObject",
+                "layoutSubviews",
                 "setStroke",
                 "setFill",
-                //"set",
                 "stroke",
                 "sizeToFit",
                 "lineWidth",
@@ -106,12 +120,10 @@ namespace Sharpness
                 "shadowOffset",
                 "shadowColor",
                 "shadowRadius",
-                "shadowPath",
-                "removeFromSuperview"
+                "shadowPath"
             };
 
-            foreach (string prop in capitalizeProperties)
-                //text = Regex.Replace(text, @"\b" + word + @"\b", word[0].ToString().ToUpperInvariant() + word.Substring(1));
+            foreach (string prop in capitalizeKeywords)
                 text = text.Replace("." + prop, "." + prop[0].ToString().ToUpperInvariant() + prop.Substring(1));
 
             SmartReplace(ref text, @"^@property (\([^)]*?\)) <var1> \*?([^\*]*?);$", "public $2 $3;", RegexOptions.Multiline);
@@ -201,7 +213,6 @@ namespace Sharpness
                 .Replace("UISwipeGestureRecognizerDirectionDown", "UISwipeGestureRecognizerDirection.Down")
                 .Replace("UISwipeGestureRecognizerDirectionLeft", "UISwipeGestureRecognizerDirection.Left")
                 .Replace("UISwipeGestureRecognizerDirectionRight", "UISwipeGestureRecognizerDirection.Right")
-                .Replace("[super layoutSubviews];", "base.LayoutSubviews();")
                 .Replace("NSTextAlignmentCenter", "NSTextAlignment.Center")
                 .Replace(" setFont:", ".Font = ")
                 .Replace(" setShadowColor:", ".ShadowColor = ")

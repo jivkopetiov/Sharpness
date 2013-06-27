@@ -42,5 +42,11 @@ namespace Sharpness.Tests
         {
             return new SharpnessParser().Parse(input);
         }
+
+        [TestCase("UITouch *touch = [touches anyObject];", Result = "UITouch touch = touches.AnyObject();")]
+        public string Test(string input)
+        {
+            return new SharpnessParser().Parse(input);
+        }
     }
 }
