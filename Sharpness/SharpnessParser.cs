@@ -29,7 +29,7 @@ namespace Sharpness
 
             var guids = new Dictionary<string, string>();
 
-            text = Regex.Replace(text, @"\[[a-zA-Z_]*?\s?alloc\s*]", match =>
+            text = Regex.Replace(text, @"\[[a-zA-Z_]*?\s*[a-zA-Z_]*?\s*]", match =>
             {
                 string g = "_" + Guid.NewGuid().ToString().Replace("-", "") + "_";
                 guids.Add(g, match.Value);
@@ -43,6 +43,8 @@ namespace Sharpness
 
             foreach (string key in guids.Keys)
                 text = text.Replace(key, guids[key]);
+
+            MethodInvocations(ref text);
 
             text = text.Replace("NSString", "string");
             
@@ -63,9 +65,9 @@ namespace Sharpness
             SmartReplace(ref text, @"\[ UIFont  systemFontOfSize : <varNum1> \]", "UIFont.SystemFontOfSize($1)");
 
             //UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, NOB_SIZE, NOB_SIZE)];
-            SmartReplace(ref text, @"UIImageView  \*<var1> = \[\[ UIImageView  alloc \]  initWithFrame : ([^\]]*?) \];", "UIImageView $1 = new UIImageView($2);");
+            //SmartReplace(ref text, @"UIImageView  \*<var1> = \[\[ UIImageView  alloc \]  initWithFrame : ([^\]]*?) \];", "UIImageView $1 = new UIImageView($2);");
 
-            // UILabel *label; -- remove star
+            // UILabel *label; -- remove stars
             SmartReplace(ref text, @"^( <var> )\*(<var>; )$", "$1$2", RegexOptions.Multiline);
             SmartReplace(ref text, @"^( <var> )\*(<var> = .*? ;)$", "$1$2", RegexOptions.Multiline);
 

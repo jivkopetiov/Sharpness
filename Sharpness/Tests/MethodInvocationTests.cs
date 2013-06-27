@@ -36,14 +36,15 @@ namespace Sharpness.Tests
             return new SharpnessParser().Parse(input);
         }
 
-        [TestCase("UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, NOB_SIZE, NOB_SIZE)];",
-            Result = "UIImageView iv = new UIImageView(new RectangleF(0,0, NOB_SIZE, NOB_SIZE));")]
-        public string UIImageView(string input)
-        {
-            return new SharpnessParser().Parse(input);
-        }
+        //[TestCase("UIImageView *iv = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, NOB_SIZE, NOB_SIZE)];",
+        //    Result = "UIImageView iv = new UIImageView(new RectangleF(0,0, NOB_SIZE, NOB_SIZE));")]
+        //public string UIImageView(string input)
+        //{
+        //    return new SharpnessParser().Parse(input);
+        //}
 
         [TestCase("UITouch *touch = [touches anyObject];", Result = "UITouch touch = touches.AnyObject();")]
+        [TestCase("[[self rootSubtreeView] recursiveSetConnectorsViewsNeedDisplay];", Result = "this.rootSubtreeView().recursiveSetConnectorsViewsNeedDisplay();")]
         public string Test(string input)
         {
             return new SharpnessParser().Parse(input);

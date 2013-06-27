@@ -32,7 +32,7 @@ namespace Sharpness
         static void Main(string[] args)
         {
             new SharpnessParser().ParseFile(
-@"C:\Users\jivko\Downloads\sharpness\TableViewUpdates\TableViewUpdates\TVAnimationsGestures\APLTableViewController.m", @"C:\Users\Jivko\Downloads");
+@"C:\Users\jivko\Downloads\sharpness\PSTreeGraph-master\PSTreeGraph-master\PSTreeGraphView\PSBaseTreeGraphView.m", @"C:\Users\Jivko\Downloads");
         }
     }
 }
